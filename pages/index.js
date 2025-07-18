@@ -1,20 +1,26 @@
 'use client';
 import { useState } from 'react';
 
+function generateRandomKey(length = 16) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for(let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export default function Home() {
-  const [key, setKey] = useState('');
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [lastKey, setLastKey] = useState('');
 
-  async function handleSubmit() {
-    if (!key.trim()) {
-      alert("Lütfen geçerli bir key girin.");
-      return;
-    }
+  async function handleAddKey() {
     setLoading(true);
     setLogs([]);
-    setSuccess(false);
+
+    const key = generateRandomKey();
+    setLastKey(key);
 
     try {
       const res = await fetch('/api/addKey', {
@@ -25,34 +31,19 @@ export default function Home() {
 
       const data = await res.json();
       setLogs(data.logs || []);
-      setSuccess(data.success);
     } catch (error) {
       setLogs([{ error: error.toString() }]);
-      setSuccess(false);
     }
+
     setLoading(false);
   }
 
   return (
     <main style={{ padding: 20, maxWidth: 600, margin: "auto", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>Key Ekleme Sistemi</h1>
-      <input
-        type="text"
-        placeholder="Yeni key girin"
-        value={key}
-        onChange={e => setKey(e.target.value.toUpperCase())}
-        style={{
-          width: "100%",
-          padding: "10px",
-          fontSize: 16,
-          marginBottom: 10,
-          borderRadius: 5,
-          border: "1px solid #ccc",
-          boxSizing: "border-box"
-        }}
-      />
+      <h1 style={{ textAlign: "center" }}>Otomatik Key Ekleme Sistemi</h1>
+
       <button
-        onClick={handleSubmit}
+        onClick={handleAddKey}
         disabled={loading}
         style={{
           padding: "10px 20px",
@@ -63,14 +54,20 @@ export default function Home() {
           border: "none",
           borderRadius: 5,
           width: "100%",
+          marginBottom: 15,
         }}
       >
-        {loading ? "Gönderiliyor..." : "Key Ekle"}
+        {loading ? "Key ekleniyor..." : "Yeni Key Oluştur ve Ekle"}
       </button>
+
+      {lastKey && (
+        <div style={{ marginBottom: 20, fontWeight: "bold" }}>
+          Son Oluşturulan Key: <code>{lastKey}</code>
+        </div>
+      )}
 
       <div
         style={{
-          marginTop: 20,
           whiteSpace: "pre-wrap",
           fontFamily: "monospace",
           maxHeight: 300,
@@ -85,12 +82,6 @@ export default function Home() {
           <div key={i}>{JSON.stringify(log)}</div>
         ))}
       </div>
-
-      {success && (
-        <div style={{ marginTop: 20, color: "green", fontWeight: "bold", textAlign: "center" }}>
-          Key başarıyla eklendi!
-        </div>
-      )}
     </main>
   );
-                 }
+}
