@@ -9,14 +9,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, logs });
     }
 
-    // Token parçalar halinde
-    const part1 = "ghp_kmm";
-    const part2 = "pomRzJANQJdSdy";
-    const part3 = "ZkbFdhk58IjZe1QW7b9";
-    const githubToken = part1 + part2 + part3;
+    // TOKEN - Burada tek parça
+    const githubToken = "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";
 
-    const repo = "emirontop/Key-system";
-    const path = "api/Keys.lua";
+    const repo = "emirontop/keySystem";
+    const path = "pages/api/Keys.lua";
 
     // Dosya içeriğini GET ile al
     const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
@@ -60,7 +57,7 @@ export default async function handler(req, res) {
         Accept: "application/vnd.github+json",
       },
       body: JSON.stringify({
-        message: "Yeni key eklendi",
+        message: `Yeni key eklendi: ${key}`,
         content: encodedContent,
         ...(sha && { sha }),
         committer: {
@@ -84,4 +81,4 @@ export default async function handler(req, res) {
     logs.push({ exception: err.toString() });
     return res.status(500).json({ success: false, logs });
   }
-}
+                                 }
